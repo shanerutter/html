@@ -654,6 +654,17 @@ class FormBuilder
             unset($selectAttributes['placeholder']);
         }
 
+        // Add bootstrap is-invalid class automatically if using laravel and session flash data errors
+        if (class_exists(\Illuminate\Support\Facades\Session::class)) {
+            /** @var ViewErrorBag $errors */
+            $errors = \Illuminate\Support\Facades\Session::get('errors');
+            if (!is_null($errors) && $errors->count()) {
+                if (sizeof($errors->getBag('default')->get($name))) {
+                    $selectAttributes['class'] = ($selectAttributes['class'] ?? '') . ' is-invalid';
+                }
+            }
+        }
+
         foreach ($list as $value => $display) {
             $optionAttributes = $optionsAttributes[$value] ?? [];
             $optgroupAttributes = $optgroupsAttributes[$value] ?? [];
