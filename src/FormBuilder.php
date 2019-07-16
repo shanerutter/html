@@ -13,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Macroable;
 
 class FormBuilder
@@ -659,7 +660,16 @@ class FormBuilder
             /** @var ViewErrorBag $errors */
             $errors = \Illuminate\Support\Facades\Session::get('errors');
             if (!is_null($errors) && $errors->count()) {
-                if (sizeof($errors->getBag('default')->get($name))) {
+                $errorIdName = $name;
+
+                // Array inputs need a bit more processing to get the correct errors
+                if (Str::contains($name, '[')) {
+                    $tmpArray = [];
+                    parse_str($name, $tmpArray);
+                    $errorIdName = Arr::first(array_flip(Arr::dot($tmpArray)));
+                }
+
+                if (sizeof($errors->getBag('default')->get($errorIdName))) {
                     $selectAttributes['class'] = ($selectAttributes['class'] ?? '') . ' is-invalid';
                 }
             }
